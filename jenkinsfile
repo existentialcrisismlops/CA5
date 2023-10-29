@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script {
                     
-                    def frontendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/myflaskapp:latest', returnStatus: true) == 0
+                    def frontendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/myflaskapp', returnStatus: true) == 0
                     def backendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/my-mongodb-image', returnStatus: true) == 0
 
                     if (frontendImageExists && backendImageExists) {

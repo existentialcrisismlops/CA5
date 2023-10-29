@@ -1,25 +1,47 @@
 pipeline {
     agent any
 
-    tools {
-        
-        dockerTool 'Docker'
-    }
-    
-    environment {
-        MYSQL_ROOT_PASSWORD = 1234
-        MYSQL_DATABASE = 'User1'
-    }
-    
     stages {
-        stage('Build and Push Docker Image') {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Docker Login') {
             steps {
                 script {
-                    // Build and push MySQL Docker image
-                    def customImage = docker.build("my-mysql-image:${env.BUILD_NUMBER}", "-f src/db/Dockerfile .")
-                    customImage.push()
+                    // Use Docker Hub credentials
+                    withCredentials([usernamePassword(credentialsId: 'Docker_Account', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    }
                 }
             }
+        }
+
+        stage('Run Docker Compose') {
+            steps {
+                script {
+                    
+                    def frontendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/myflaskapp:latest', returnStatus: true) == 0
+                    def backendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/my-mongodb-image', returnStatus: true) == 0
+
+                    if (frontendImageExists && backendImageExists) {
+                        sh 'docker-compose up -d'
+                    } else {
+                        error 'Required Docker images not found on Docker Hub.'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker Compose stack started successfully.'
+        }
+        failure {
+            error 'Failed to start Docker Compose stack.'
         }
     }
 }

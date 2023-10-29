@@ -11,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def appImage = docker.build("existentialcrisismlops/flask-signup-app:latest")
+                    dockerImage = docker.build("existentialcrisismlops/flask-signup-app:latest")
                 }
             }
         }
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        appImage.push()
+                        dockerImage.push()
                     }
                 }
             }

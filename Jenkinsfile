@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Define your Docker Hub credentials
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        DOCKER_IMAGE_NAME = 'existentialcrisismlops/my-mongo-db-image'
+        DOCKER_IMAGE_NAME = 'my-mongo-db-image'
         DOCKER_IMAGE_TAG = 'latest'
     }
     stages {

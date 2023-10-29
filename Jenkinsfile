@@ -1,28 +1,40 @@
 pipeline {
     agent any
-
     stages {
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'CA5') {
+                        sh "docker build -t my-mongo-db-image:latest ."
+                        sh "docker push"
+                    }
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        stage('Docker Login') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Use Docker Hub credentials
-                    withCredentials([usernamePassword(credentialsId: 'Docker_Account', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    def appImage = docker.build("existentialcrisismlops/flask-signup-app:latest")
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com') {
+                        appImage.push()
                     }
                 }
             }
         }
-
         stage('Run Docker Compose') {
             steps {
                 script {
-                    
                     def frontendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/myflaskapp', returnStatus: true) == 0
                     def backendImageExists = sh(script: 'docker pull analysts/existentialcrisismlops/my-mongodb-image', returnStatus: true) == 0
 

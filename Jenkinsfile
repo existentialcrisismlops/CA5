@@ -11,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def appImage = docker.build("harmainnasim/flask-signup-app:latest")
+                    def appImage = docker.build("existentialcrisismlops/flask-signup-app:latest")
                 }
             }
         }
